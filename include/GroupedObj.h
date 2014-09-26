@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef GROUPEDOBJ_H_
-#define GROUPOBJ_H_
+#define GROUPEDOBJ_H_
 //----------------------------------------------------------------------------------------------------------------------
 /// @file GroupedObj.h
 /// @brief This class loads in an Alias Obj file containing groups of meshes
