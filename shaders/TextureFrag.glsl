@@ -1,4 +1,4 @@
-#version 400 core
+#version 330 core
 /// @brief our output fragment colour
 layout (location =0) out vec4 fragColour;
 // this is a pointer to the current 2D texture object
