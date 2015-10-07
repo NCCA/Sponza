@@ -11,3 +11,6 @@ For a detailed look at how this work see the following blog posts
 [The mtl Class](http://jonmacey.blogspot.co.uk/2012/11/sponza-demo-pt-2-mtl-class.html)
 
 [GroupedObj class](http://jonmacey.blogspot.co.uk/2012/11/sponza-demo-pt-3-groupedobj-class.html)
+
+
+Note this branch is an older version and will not be maintained as it uses the old OpenGL widget
