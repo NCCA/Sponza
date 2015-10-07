@@ -536,6 +536,26 @@ bool GroupedObj::saveBinary(const std::string &_fname)
   return true;
 }
 
+
+// a simple structure to hold our vertex data
+struct vertData
+{
+	GLfloat u; // tex cords from obj
+	GLfloat v; // tex cords
+	GLfloat nx; // normal from obj mesh
+	GLfloat ny;
+	GLfloat nz;
+	GLfloat x; // position from obj
+	GLfloat y;
+	GLfloat z;
+	GLfloat tx; // tangent calculated by us
+	GLfloat ty;
+	GLfloat tz;
+	GLfloat bx; // binormal (bi-tangent really) calculated by us
+	GLfloat by;
+	GLfloat bz;
+};
+
 bool GroupedObj::loadBinary(const std::string &_fname)
 {
   m_meshes.clear();
@@ -582,8 +602,8 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   }
 
   fileIn.read(reinterpret_cast<char *>(&size),sizeof(size));
-  ngl::Real *vertData= new ngl::Real[size];
-  fileIn.read(reinterpret_cast<char *>(&vertData[0]),size);
+  ngl::Real *data= new ngl::Real[size];
+  fileIn.read(reinterpret_cast<char *>(&data[0]),size);
   fileIn.close();
 
   // first we grab an instance of our VOA
@@ -596,7 +616,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   // how much (in bytes) data we are copying
   // a pointer to the first element of data (in this case the address of the first element of the
   // std::vector
-  m_vaoMesh->setData(size,vertData[0]);
+  m_vaoMesh->setData(size,data[0]);
   // in this case we have packed our data in interleaved format as follows
   // u,v,nx,ny,nz,x,y,z
   // If you look at the shader we have the following attributes being used
@@ -607,35 +627,181 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   // vertex is attribute 0 with x,y,z(3) parts of type GL_FLOAT, our complete packed data is
   // sizeof(vertData) and the offset into the data structure for the first x component is 5 (u,v,nx,ny,nz)..x
   // a simple structure to hold our vertex data
-  struct VertData
-  {
-    GLfloat u; // tex cords
-    GLfloat v; // tex cords
-    GLfloat nx; // normal from obj mesh
-    GLfloat ny;
-    GLfloat nz;
-    GLfloat x; // position from obj
-    GLfloat y;
-    GLfloat z;
-  };
 
-  m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(VertData),5);
+  m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),5);
   // uv same as above but starts at 0 and is attrib 1 and only u,v so 2
-  m_vaoMesh->setVertexAttributePointer(1,2,GL_FLOAT,sizeof(VertData),0);
+  m_vaoMesh->setVertexAttributePointer(1,2,GL_FLOAT,sizeof(vertData),0);
   // normal same as vertex only starts at position 2 (u,v)-> nx
-  m_vaoMesh->setVertexAttributePointer(2,3,GL_FLOAT,sizeof(VertData),2);
+  m_vaoMesh->setVertexAttributePointer(2,3,GL_FLOAT,sizeof(vertData),2);
+  // tangent same as vertex only starts at position 8 (u,v)-> nx
+  m_vaoMesh->setVertexAttributePointer(3,3,GL_FLOAT,sizeof(vertData),8);
+
+	// bi-tangent (or Binormal) same as vertex only starts at position 11 (u,v)-> nx
+	m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
 
 
   // now we have set the vertex attributes we tell the VAO class how many indices to draw when
   // glDrawArrays is called, in this case we use buffSize (but if we wished less of the sphere to be drawn we could
   // specify less (in steps of 3))
-  m_vaoMesh->setNumIndices(size/sizeof(VertData));
+  m_vaoMesh->setNumIndices(size/sizeof(vertData));
   // finally we have finished for now so time to unbind the VAO
   m_vaoMesh->unbind();
 
   // indicate we have a vao now
   m_vao=true;
-  delete [] vertData;
+  delete [] data;
   return true;
 
 }
+
+
+
+void GroupedObj::createVAO()
+{
+
+// else allocate space as build our VAO
+	m_dataPackType=0;
+	if(isTriangular())
+	{
+		m_dataPackType=GL_TRIANGLES;
+		std::cout <<"Doing Tri Data"<<std::endl;
+	}
+	// data is mixed of > quad so exit error
+	if(m_dataPackType == 0)
+	{
+		std::cerr<<"Can only create VBO from all Triangle or ALL Quad data at present"<<std::endl;
+		exit(EXIT_FAILURE);
+	}
+
+  // now we are going to process and pack the mesh into an ngl::VertexArrayObject
+  std::vector <vertData> vboMesh;
+  vertData d;
+  int loopFaceCount=3;
+
+
+	// loop for each of the faces
+	for(unsigned int i=0;i<m_nFaces;++i)
+	{
+		// now for each triangle in the face (remember we ensured tri above)
+		for(int j=0;j<loopFaceCount;++j)
+		{
+
+			// pack in the vertex data first
+			d.x=m_verts[m_face[i].m_vert[j]].m_x;
+			d.y=m_verts[m_face[i].m_vert[j]].m_y;
+			d.z=m_verts[m_face[i].m_vert[j]].m_z;
+			// now if we have norms of tex (possibly could not) pack them as well
+			if(m_nNorm >0 && m_nTex > 0)
+			{
+
+        d.nx=m_norm[m_face[i].m_norm[j]].m_x;
+        d.ny=m_norm[m_face[i].m_norm[j]].m_y;
+        d.nz=m_norm[m_face[i].m_norm[j]].m_z;
+
+				d.u=m_tex[m_face[i].m_tex[j]].m_x;
+				d.v=m_tex[m_face[i].m_tex[j]].m_y;
+
+      }
+      // now if neither are present (only verts like Zbrush models)
+      else if(m_nNorm ==0 && m_nTex==0)
+      {
+        d.nx=0;
+        d.ny=0;
+        d.nz=0;
+        d.u=0;
+        d.v=0;
+      }
+      // here we've got norms but not tex
+      else if(m_nNorm >0 && m_nTex==0)
+      {
+        d.nx=m_norm[m_face[i].m_norm[j]].m_x;
+        d.ny=m_norm[m_face[i].m_norm[j]].m_y;
+        d.nz=m_norm[m_face[i].m_norm[j]].m_z;
+        d.u=0;
+        d.v=0;
+      }
+      // here we've got tex but not norm least common
+      else if(m_nNorm ==0 && m_nTex>0)
+      {
+        d.nx=0;
+        d.ny=0;
+        d.nz=0;
+        d.u=m_tex[m_face[i].m_tex[j]].m_x;
+        d.v=m_tex[m_face[i].m_tex[j]].m_y;
+      }
+      // now we calculate the tangent / bi-normal (tangent) based on the article here
+      // http://www.terathon.com/code/tangent.html
+
+      ngl::Vec3 c1 = m_norm[m_face[i].m_norm[j]].cross(ngl::Vec3(0.0, 0.0, 1.0));
+      ngl::Vec3 c2 = m_norm[m_face[i].m_norm[j]].cross(ngl::Vec3(0.0, 1.0, 0.0));
+      ngl::Vec3 tangent;
+      ngl::Vec3 binormal;
+      if(c1.length()>c2.length())
+      {
+        tangent = c1;
+      }
+      else
+      {
+        tangent = c2;
+      }
+      // now we normalize the tangent so we don't need to do it in the shader
+      tangent.normalize();
+      // now we calculate the binormal using the model normal and tangent (cross)
+      binormal = m_norm[m_face[i].m_norm[j]].cross(tangent);
+      // normalize again so we don't need to in the shader
+      binormal.normalize();
+      d.tx=tangent.m_x;
+      d.ty=tangent.m_y;
+      d.tz=tangent.m_z;
+      d.bx=binormal.m_x;
+      d.by=binormal.m_y;
+      d.bz=binormal.m_z;
+
+    vboMesh.push_back(d);
+    }
+  }
+
+  // first we grab an instance of our VOA
+  m_vaoMesh = ngl::VertexArrayObject::createVOA(m_dataPackType);
+  // next we bind it so it's active for setting data
+  m_vaoMesh->bind();
+  m_meshSize=vboMesh.size();
+
+	// now we have our data add it to the VAO, we need to tell the VAO the following
+	// how much (in bytes) data we are copying
+	// a pointer to the first element of data (in this case the address of the first element of the
+	// std::vector
+	m_vaoMesh->setData(m_meshSize*sizeof(vertData),vboMesh[0].u);
+	// in this case we have packed our data in interleaved format as follows
+	// u,v,nx,ny,nz,x,y,z
+	// If you look at the shader we have the following attributes being used
+	// attribute vec3 inVert; attribute 0
+	// attribute vec2 inUV; attribute 1
+	// attribute vec3 inNormal; attribure 2
+	// so we need to set the vertexAttributePointer so the correct size and type as follows
+	// vertex is attribute 0 with x,y,z(3) parts of type GL_FLOAT, our complete packed data is
+	// sizeof(vertData) and the offset into the data structure for the first x component is 5 (u,v,nx,ny,nz)..x
+	m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),5);
+	// uv same as above but starts at 0 and is attrib 1 and only u,v so 2
+	m_vaoMesh->setVertexAttributePointer(1,2,GL_FLOAT,sizeof(vertData),0);
+	// normal same as vertex only starts at position 2 (u,v)-> nx
+	m_vaoMesh->setVertexAttributePointer(2,3,GL_FLOAT,sizeof(vertData),2);
+	// tangent same as vertex only starts at position 8 (u,v)-> nx
+	m_vaoMesh->setVertexAttributePointer(3,3,GL_FLOAT,sizeof(vertData),8);
+
+	// bi-tangent (or Binormal) same as vertex only starts at position 11 (u,v)-> nx
+	m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
+
+
+	// now we have set the vertex attributes we tell the VAO class how many indices to draw when
+	// glDrawArrays is called, in this case we use buffSize (but if we wished less of the sphere to be drawn we could
+	// specify less (in steps of 3))
+	m_vaoMesh->setNumIndices(m_meshSize);
+	// finally we have finished for now so time to unbind the VAO
+	m_vaoMesh->unbind();
+
+	// indicate we have a vao now
+	m_vao=true;
+
+}
+

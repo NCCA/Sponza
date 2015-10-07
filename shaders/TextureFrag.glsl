@@ -9,6 +9,9 @@ uniform vec3 ka;
 uniform float transp;
 void main ()
 {
+  vec4 diffuse = texture(tex,vertUV);
+  if (diffuse.a == 0)
+      discard;
  // set the fragment colour to the current texture
- fragColour = vec4(ka,transp)*texture(tex,vertUV);
+ fragColour = vec4(ka,transp)*diffuse;
 }

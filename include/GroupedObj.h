@@ -216,6 +216,7 @@ protected :
     /// time we find a new group. it will also re-set faceCount to zero once this is done
     //----------------------------------------------------------------------------------------------------------------------
     unsigned int m_offset;
+    void createVAO();
 
 
 };
