@@ -161,6 +161,11 @@ bool Mtl::load(const std::string &_fname)
       {
         parseString(firstWord,m_current->bump);
       }
+      else if(*firstWord == "map_Ks")
+      {
+        parseString(firstWord,m_current->map_Ks);
+      }
+
 
 
    } // end zero line

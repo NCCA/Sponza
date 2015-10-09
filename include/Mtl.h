@@ -55,11 +55,13 @@ typedef struct
   std::string map_d;
   std::string map_bump;
   std::string bump;
+  std::string map_Ks;
   GLuint map_KaId;
   GLuint map_KdId;
   GLuint map_dId;
   GLuint map_bumpId;
   GLuint bumpId;
+  GLuint map_KsId;
 
 }mtlItem;
 
