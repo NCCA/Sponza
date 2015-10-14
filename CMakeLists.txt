@@ -8,14 +8,11 @@ include_directories(include $ENV{HOME}/NGL/include)
 #the file(GLOB...) allows for wildcard additions of our src dir
 set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp  
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
-			${PROJECT_SOURCE_DIR}/src/OpenGLWindow.cpp
 			${PROJECT_SOURCE_DIR}/src/GroupedObj.cpp
 			${PROJECT_SOURCE_DIR}/src/Mtl.cpp
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
-			${PROJECT_SOURCE_DIR}/include/OpenGLWindow.h
 			${PROJECT_SOURCE_DIR}/include/GroupedObj.h
 			${PROJECT_SOURCE_DIR}/include/Mtl.h
-
 )
 
 # see what platform we are on and set platform defines
