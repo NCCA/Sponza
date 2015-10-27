@@ -317,7 +317,7 @@ void GroupedObj::parseFace( const char * _begin  )
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool GroupedObj::load(const std::string &_fname,bool _calcBB  )
+bool GroupedObj::load(const std::string &_fname,bool _calcBB  ) noexcept
 {
  // here we build up our ebnf rules for parsing
   // so first we have a comment
