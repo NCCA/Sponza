@@ -36,18 +36,14 @@ NGLScene::NGLScene()
 NGLScene::~NGLScene()
 {
   std::cout<<"Shutting down NGL, removing VAO's and Shaders\n";
-  delete m_mtl;
-  delete m_model;
 }
 
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL(QResizeEvent *_event)
 {
-  // set the viewport for openGL we need to take into account retina display
-  // etc by using the pixel ratio as a multiplyer
-  glViewport(0,0,_w*devicePixelRatio(),_h*devicePixelRatio());
+  m_width=_event->size().width()*devicePixelRatio();
+  m_height=_event->size().height()*devicePixelRatio();
   // now set the camera size values as the screen size has changed
-  m_cam->setShape(45.0f,(float)width()/height(),0.05f,350.0f);
-  update();
+  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 
@@ -70,10 +66,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,40,-140);
   ngl::Vec3 to(0,40,0);
   ngl::Vec3 up(0,1,0);
-  m_cam= new ngl::Camera(from,to,up);
+  m_cam.set(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam->setShape(50,(float)1024/720,10,8000);
+  m_cam.setShape(50,(float)1024/720,10,8000);
   // now to load the shader and set the values
   // grab an instance of shader manager
   // grab an instance of shader manager
@@ -101,7 +97,7 @@ void NGLScene::initializeGL()
 
   glEnable(GL_DEPTH_TEST);
 
-  m_mtl = new Mtl;
+  m_mtl.reset(  new Mtl);
   //bool loaded=m_mtl->loadBinary("sponzaMtl.bin");
   bool loaded=m_mtl->load("models/sponza.mtl");
 
@@ -112,7 +108,7 @@ void NGLScene::initializeGL()
   }
 
 
-  m_model = new GroupedObj("models/sponza.obj");
+  m_model.reset(  new GroupedObj("models/sponza.obj"));
   //loaded=m_model->loadBinary("SponzaMesh.bin");
   if(loaded == false)
   {
@@ -130,7 +126,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-  ngl::Mat4 MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam->getVPMatrix();
+  ngl::Mat4 MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam.getVPMatrix();
 
   shader->setShaderParamFromMat4("MVP",MVP);
  }
@@ -153,6 +149,7 @@ void NGLScene::paintGL()
 
   // clear the screen and depth buffer
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glViewport(0,0,m_width,m_height);
   loadMatricesToShader();
   unsigned int end=m_model->numMeshes();
   std::string matName;

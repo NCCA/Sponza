@@ -14,7 +14,7 @@
 /// @todo add serialisation to save the data to binary formats for quick read / write
 #include <ngl/Vec3.h>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
@@ -109,19 +109,19 @@ class Mtl
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief const iterator to the begining of the material list
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::map<std::string, mtlItem *>::const_iterator begin() const {return m_materials.begin(); }
+    inline std::unordered_map<std::string, mtlItem *>::const_iterator begin() const {return m_materials.begin(); }
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief const iterator to the end of the material list
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::map<std::string, mtlItem *>::const_iterator end() const {return m_materials.end(); }
+    inline std::unordered_map<std::string, mtlItem *>::const_iterator end() const {return m_materials.end(); }
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief  iterator to the begining of the material list
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::map<std::string, mtlItem *>::iterator begin() {return m_materials.begin(); }
+    inline std::unordered_map<std::string, mtlItem *>::iterator begin() {return m_materials.begin(); }
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief  iterator to the end of the material list
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::map<std::string, mtlItem *>::iterator end()  {return m_materials.end(); }
+    inline std::unordered_map<std::string, mtlItem *>::iterator end()  {return m_materials.end(); }
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief  method to find the material by name
     /// @param [in] _n the name of the material to find
@@ -150,7 +150,7 @@ class Mtl
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief map used to store the material for name lookup
     //----------------------------------------------------------------------------------------------------------------------
-    std::map <std::string, mtlItem *> m_materials;
+    std::unordered_map <std::string, mtlItem *> m_materials;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief current item used in the parser for storing values
     //----------------------------------------------------------------------------------------------------------------------

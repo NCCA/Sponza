@@ -200,8 +200,8 @@ void Mtl::loadTextures()
   std::cout<<"loading textures this may take some time\n";
   // first loop and store all the texture names in the container
   std::list <std::string> names;
-  std::map<std::string, mtlItem *>::const_iterator end=m_materials.end();
-  std::map<std::string, mtlItem *>::const_iterator i = m_materials.begin();
+  auto end=m_materials.end();
+  auto i = m_materials.begin();
   for( ; i != end; ++i )
   {
     if(i->second->map_Ka.size() !=0)
@@ -253,15 +253,15 @@ void Mtl::loadTextures()
 
 void Mtl::clear()
 {
-  std::map<std::string, mtlItem *>::const_iterator end=m_materials.end();
-  std::map<std::string, mtlItem *>::const_iterator i = m_materials.begin();
+  auto end=m_materials.end();
+  auto i = m_materials.begin();
   for( ; i != end; ++i )
   {
     delete i->second;
   }
   if(m_loadTextures==true)
   {
-  BOOST_FOREACH(GLuint i, m_textureID)
+  for(auto i : m_textureID)
     glDeleteTextures(1,&i);
   }
 }
@@ -270,8 +270,8 @@ void Mtl::clear()
 
 void Mtl::debugPrint() const
 {
-  std::map<std::string, mtlItem *>::const_iterator end=m_materials.end();
-  std::map<std::string, mtlItem *>::const_iterator i = m_materials.begin();
+  auto end=m_materials.end();
+  auto i = m_materials.begin();
   std::cout<<m_materials.size()<<"\n";
   for( ; i != end; ++i )
   {
@@ -306,7 +306,7 @@ void Mtl::debugPrint() const
 
 mtlItem  * Mtl::find(const std::string &_n) const
 {
-  std::map <std::string, mtlItem * >::const_iterator material=m_materials.find(_n);
+  auto material=m_materials.find(_n);
   // make sure we have a valid  material
   if(material!=m_materials.end() )
   {
@@ -336,8 +336,8 @@ bool Mtl::saveBinary(const std::string &_fname) const
 
   unsigned int size=m_materials.size();
   fileOut.write(reinterpret_cast<char *>(&size),sizeof(size));
-  std::map<std::string, mtlItem *>::const_iterator start=m_materials.begin();
-  std::map<std::string, mtlItem *>::const_iterator end=m_materials.end();
+  auto start=m_materials.begin();
+  auto end=m_materials.end();
   for(; start!=end; ++start)
   {
     //std::cout<<"writing out "<<start->first<<"\n";
