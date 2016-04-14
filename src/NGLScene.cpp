@@ -9,6 +9,9 @@
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
+#include <ngl/VAOFactory.h>
+#include "VAO.h"
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -29,6 +32,8 @@ NGLScene::NGLScene()
   m_spinYFace=0;
   setTitle("Sponza Demo");
   m_whichMap=0;
+  ngl::VAOFactory::registerVAOCreator("sponzaVAO",VAO::create);
+
 }
 
 
@@ -120,7 +125,6 @@ void NGLScene::initializeGL()
     std::cerr<<"error loading obj file ";
     exit(EXIT_FAILURE);
   }
-
 
   // as re-size is not explicitly called we need to do this.
   glViewport(0,0,width(),height());

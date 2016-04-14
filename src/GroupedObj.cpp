@@ -20,6 +20,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 #include "GroupedObj.h"
+#include <ngl/VAOFactory.h>
+#include <VAO.h>
 //----------------------------------------------------------------------------------------------------------------------
 /// @file GroupedObj.cpp
 
@@ -478,7 +480,8 @@ void GroupedObj::draw(int _meshID) const
 {
 //  std::cout<<"Drawing \n";
   m_vaoMesh->bind();
-  m_vaoMesh->draw(m_meshes[_meshID].m_startIndex,m_meshes[_meshID].m_numVerts );
+
+  reinterpret_cast<VAO *>( m_vaoMesh.get())->draw(m_meshes[_meshID].m_startIndex,m_meshes[_meshID].m_numVerts );
   m_vaoMesh->unbind();
 
 }
@@ -522,7 +525,7 @@ bool GroupedObj::saveBinary(const std::string &_fname)
 
   m_vaoMesh->bind();
 
-  size=m_vaoMesh->getSize();
+  size=reinterpret_cast <VAO *>(m_vaoMesh.get())->getSize();
 
   fileOut.write(reinterpret_cast <char *>(&size),sizeof(unsigned int));
 
@@ -607,7 +610,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   fileIn.close();
 
   // first we grab an instance of our VOA
-  m_vaoMesh= ngl::VertexArrayObject::createVOA(GL_TRIANGLES);
+  m_vaoMesh.reset(ngl::VAOFactory::createVAO("sponzaVAO",GL_TRIANGLES));
   // next we bind it so it's active for setting data
   m_vaoMesh->bind();
   m_meshSize=size;
@@ -616,7 +619,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   // how much (in bytes) data we are copying
   // a pointer to the first element of data (in this case the address of the first element of the
   // std::vector
-  m_vaoMesh->setData(size,data[0]);
+  reinterpret_cast<VAO*>( m_vaoMesh.get())->setData(size,data[0]);
   // in this case we have packed our data in interleaved format as follows
   // u,v,nx,ny,nz,x,y,z
   // If you look at the shader we have the following attributes being used
@@ -762,7 +765,7 @@ void GroupedObj::createVAO()
   }
 
   // first we grab an instance of our VOA
-  m_vaoMesh = ngl::VertexArrayObject::createVOA(m_dataPackType);
+  m_vaoMesh.reset( ngl::VAOFactory::createVAO ("sponzaVAO",m_dataPackType) );
   // next we bind it so it's active for setting data
   m_vaoMesh->bind();
   m_meshSize=vboMesh.size();
@@ -771,7 +774,7 @@ void GroupedObj::createVAO()
 	// how much (in bytes) data we are copying
 	// a pointer to the first element of data (in this case the address of the first element of the
 	// std::vector
-	m_vaoMesh->setData(m_meshSize*sizeof(vertData),vboMesh[0].u);
+  reinterpret_cast<VAO*>(m_vaoMesh.get())->setData(m_meshSize*sizeof(vertData),vboMesh[0].u);
 	// in this case we have packed our data in interleaved format as follows
 	// u,v,nx,ny,nz,x,y,z
 	// If you look at the shader we have the following attributes being used
