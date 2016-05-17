@@ -482,6 +482,7 @@ void GroupedObj::draw(int _meshID) const
   m_vaoMesh->bind();
 
   reinterpret_cast<VAO *>( m_vaoMesh.get())->draw(m_meshes[_meshID].m_startIndex,m_meshes[_meshID].m_numVerts );
+
   m_vaoMesh->unbind();
 
 }
@@ -619,7 +620,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   // how much (in bytes) data we are copying
   // a pointer to the first element of data (in this case the address of the first element of the
   // std::vector
-  reinterpret_cast<VAO*>( m_vaoMesh.get())->setData(size,data[0]);
+  m_vaoMesh->setData(VAO::VertexData(size,data[0]));
   // in this case we have packed our data in interleaved format as follows
   // u,v,nx,ny,nz,x,y,z
   // If you look at the shader we have the following attributes being used
@@ -774,8 +775,8 @@ void GroupedObj::createVAO()
 	// how much (in bytes) data we are copying
 	// a pointer to the first element of data (in this case the address of the first element of the
 	// std::vector
-  reinterpret_cast<VAO*>(m_vaoMesh.get())->setData(m_meshSize*sizeof(vertData),vboMesh[0].u);
-	// in this case we have packed our data in interleaved format as follows
+  m_vaoMesh->setData(VAO::VertexData(m_meshSize*sizeof(vertData),vboMesh[0].u));
+  // in this case we have packed our data in interleaved format as follows
 	// u,v,nx,ny,nz,x,y,z
 	// If you look at the shader we have the following attributes being used
 	// attribute vec3 inVert; attribute 0
