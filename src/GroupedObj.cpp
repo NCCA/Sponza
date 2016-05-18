@@ -508,7 +508,7 @@ bool GroupedObj::saveBinary(const std::string &_fname)
   const std::string header("ngl::objbin");
   fileOut.write(header.c_str(),header.length());
 
-  unsigned int size=m_meshes.size();
+  size_t size=m_meshes.size();
   fileOut.write(reinterpret_cast<char *>(&size),sizeof(size));
   BOOST_FOREACH(MeshData m, m_meshes)
   {
@@ -587,7 +587,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   fileIn.read(reinterpret_cast<char *>(&vecsize),sizeof(vecsize));
   unsigned int size;
   std::string s;
-  for(unsigned int i=0; i<vecsize; ++i)
+  for(size_t i=0; i<vecsize; ++i)
   {
     MeshData d;
     fileIn.read(reinterpret_cast<char *>(&size),sizeof(size));
@@ -606,7 +606,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   }
 
   fileIn.read(reinterpret_cast<char *>(&size),sizeof(size));
-  ngl::Real *data= new ngl::Real[size];
+  std::unique_ptr<ngl::Real []> data( new ngl::Real[size]);
   fileIn.read(reinterpret_cast<char *>(&data[0]),size);
   fileIn.close();
 
@@ -641,7 +641,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   m_vaoMesh->setVertexAttributePointer(3,3,GL_FLOAT,sizeof(vertData),8);
 
 	// bi-tangent (or Binormal) same as vertex only starts at position 11 (u,v)-> nx
-	m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
+  m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
 
 
   // now we have set the vertex attributes we tell the VAO class how many indices to draw when
@@ -653,7 +653,6 @@ bool GroupedObj::loadBinary(const std::string &_fname)
 
   // indicate we have a vao now
   m_vao=true;
-  delete [] data;
   return true;
 
 }
@@ -680,14 +679,14 @@ void GroupedObj::createVAO()
   // now we are going to process and pack the mesh into an ngl::VertexArrayObject
   std::vector <vertData> vboMesh;
   vertData d;
-  int loopFaceCount=3;
+  size_t loopFaceCount=3;
 
 
 	// loop for each of the faces
-	for(unsigned int i=0;i<m_nFaces;++i)
+  for(size_t i=0;i<m_nFaces;++i)
 	{
 		// now for each triangle in the face (remember we ensured tri above)
-		for(int j=0;j<loopFaceCount;++j)
+    for(size_t j=0;j<loopFaceCount;++j)
 		{
 
 			// pack in the vertex data first
@@ -785,24 +784,24 @@ void GroupedObj::createVAO()
 	// so we need to set the vertexAttributePointer so the correct size and type as follows
 	// vertex is attribute 0 with x,y,z(3) parts of type GL_FLOAT, our complete packed data is
 	// sizeof(vertData) and the offset into the data structure for the first x component is 5 (u,v,nx,ny,nz)..x
-	m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),5);
+  m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),5);
 	// uv same as above but starts at 0 and is attrib 1 and only u,v so 2
-	m_vaoMesh->setVertexAttributePointer(1,2,GL_FLOAT,sizeof(vertData),0);
+  m_vaoMesh->setVertexAttributePointer(1,2,GL_FLOAT,sizeof(vertData),0);
 	// normal same as vertex only starts at position 2 (u,v)-> nx
-	m_vaoMesh->setVertexAttributePointer(2,3,GL_FLOAT,sizeof(vertData),2);
+  m_vaoMesh->setVertexAttributePointer(2,3,GL_FLOAT,sizeof(vertData),2);
 	// tangent same as vertex only starts at position 8 (u,v)-> nx
-	m_vaoMesh->setVertexAttributePointer(3,3,GL_FLOAT,sizeof(vertData),8);
+  m_vaoMesh->setVertexAttributePointer(3,3,GL_FLOAT,sizeof(vertData),8);
 
 	// bi-tangent (or Binormal) same as vertex only starts at position 11 (u,v)-> nx
-	m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
+  m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
 
 
 	// now we have set the vertex attributes we tell the VAO class how many indices to draw when
 	// glDrawArrays is called, in this case we use buffSize (but if we wished less of the sphere to be drawn we could
 	// specify less (in steps of 3))
-	m_vaoMesh->setNumIndices(m_meshSize);
+  m_vaoMesh->setNumIndices(m_meshSize);
 	// finally we have finished for now so time to unbind the VAO
-	m_vaoMesh->unbind();
+  m_vaoMesh->unbind();
 
 	// indicate we have a vao now
 	m_vao=true;

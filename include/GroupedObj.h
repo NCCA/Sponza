@@ -61,7 +61,7 @@ typedef struct MeshData
   /// @brief the number of vertices to draw from the start index
   unsigned int m_numVerts;
   /// @brief overloaded < operator for mesh sorting
-  inline bool operator <(const MeshData &_r)const {return m_material < _r.m_material;}
+  bool operator <(const MeshData &_r)const {return m_material < _r.m_material;}
 }M;
 
 
@@ -137,19 +137,19 @@ public :
   /// @brief  accessor for the number of meshes in the array
   /// @returns m_meshes.size()
   //----------------------------------------------------------------------------------------------------------------------
-  inline int numMeshes()const {return m_meshes.size(); }
+  size_t numMeshes()const {return m_meshes.size(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  accessor for the material name at index i
   /// @param[in] _m the index to access no error checking.
   /// @returns material at index.
   //----------------------------------------------------------------------------------------------------------------------
-  inline std::string getMaterial(unsigned int _m)const {return m_meshes[_m].m_material;}
+  std::string getMaterial(unsigned int _m)const {return m_meshes[_m].m_material;}
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  accessor for the group name name at index i
   /// @param[in] _m the index to access no error checking.
   /// @returns group name at index.
   //----------------------------------------------------------------------------------------------------------------------
-  inline std::string getName(unsigned int _m)const {return m_meshes[_m].m_name;}
+  std::string getName(unsigned int _m)const {return m_meshes[_m].m_name;}
 
 protected :
   //----------------------------------------------------------------------------------------------------------------------
