@@ -158,7 +158,7 @@ void GroupedObj::parseNormal(const char *_begin )
 }
 
 
-void GroupedObj::splitFace(const std::vector<int> &_v, const std::vector<int> &_t,  const std::vector<int> &_n )
+void GroupedObj::splitFace(const std::vector<unsigned int> &_v, const std::vector<unsigned int> &_t,  const std::vector<unsigned int> &_n )
 {
   //std::cout<< "splitting quad face to triangles \n";
   // so now build a face structure.
@@ -232,11 +232,11 @@ void GroupedObj::parseFace( const char * _begin  )
 {
   // ok this one is quite complex first create some lists for our face data
   // list to hold the vertex data indices
-  std::vector<int> vec;
+  std::vector<unsigned int> vec;
   // list to hold the tex cord indices
-  std::vector<int> tvec;
+  std::vector<unsigned int> tvec;
   // list to hold the normal indices
-  std::vector<int> nvec;
+  std::vector<unsigned int> nvec;
 
   // create the parse rule for a face entry V/T/N
   // so our entry can be always a vert, followed by optional t and norm seperated by /
@@ -253,7 +253,7 @@ void GroupedObj::parseFace( const char * _begin  )
   // now we've done this we can parse
  spt::parse(_begin, face, spt::space_p);
 
-  int numVerts=vec.size();
+  size_t numVerts=vec.size();
   if(numVerts !=3 )
   {
     //std::cerr<<"Warning non-triangular face if quad will split else re-model. size is "<<numVerts<<"\n";
@@ -269,7 +269,7 @@ void GroupedObj::parseFace( const char * _begin  )
   f.m_textureCoord=false;
   // copy the vertex indices into our face data structure index in obj start from 1
   // so we need to do -1 for our array index
-  BOOST_FOREACH(int i, vec)
+  for(auto i : vec)
   {
     f.m_vert.push_back(i-1);
   }
@@ -286,7 +286,7 @@ void GroupedObj::parseFace( const char * _begin  )
     }
 
     // copy in these references to normal vectors to the mesh's normal vector
-    BOOST_FOREACH(int i, nvec)
+    for(auto i : nvec)
     {
       f.m_norm.push_back(i-1);
     }
@@ -304,7 +304,7 @@ void GroupedObj::parseFace( const char * _begin  )
     }
 
     // copy in these references to normal vectors to the mesh's normal vector
-    BOOST_FOREACH(int i, tvec)
+    for(auto i : tvec)
     {
       f.m_tex.push_back(i-1);
     }
@@ -319,7 +319,7 @@ void GroupedObj::parseFace( const char * _begin  )
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool GroupedObj::load(const std::string &_fname,bool _calcBB  ) noexcept
+bool GroupedObj::load(const std::string &_fname,CalcBB _calcBB  ) noexcept
 {
  // here we build up our ebnf rules for parsing
   // so first we have a comment
@@ -368,7 +368,7 @@ bool GroupedObj::load(const std::string &_fname,bool _calcBB  ) noexcept
   m_nFaces=m_face.size();
 
   // Calculate the center of the object.
-  if(_calcBB == true)
+  if(_calcBB == CalcBB::True)
   {
     this->calcDimensions();
   }
@@ -659,7 +659,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
 
 
 
-void GroupedObj::createVAO()
+void GroupedObj::createVAO() noexcept
 {
 
 // else allocate space as build our VAO

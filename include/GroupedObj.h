@@ -85,7 +85,7 @@ public :
   /// @param[in]  _fname the name of the obj file to load
   /// @param[in] _calcBB if we only want to load data and not use GL then set this to false
   //----------------------------------------------------------------------------------------------------------------------
-  bool load(const std::string& _fname, bool _calcBB=true ) noexcept;
+  bool load(const std::string& _fname, CalcBB _calcBB=CalcBB::True) noexcept;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  method to save the obj
   /// @param[in] _fname the name of the file to save
@@ -189,7 +189,7 @@ protected :
   /// @param[in] _n the list of normals found by the parser
   //----------------------------------------------------------------------------------------------------------------------
 
-  void splitFace(const std::vector<int> &_v,const std::vector<int> &_t,const std::vector<int> &_n);
+  void splitFace(const std::vector<unsigned int> &_v,const std::vector<unsigned int> &_t,const std::vector<unsigned int> &_n);
  private :
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief the list of mesh data that stores the group information
@@ -216,7 +216,7 @@ protected :
     /// time we find a new group. it will also re-set faceCount to zero once this is done
     //----------------------------------------------------------------------------------------------------------------------
     unsigned int m_offset;
-    void createVAO();
+    void createVAO() noexcept;
 
 
 };
