@@ -1,5 +1,5 @@
-#ifndef MTL_H__
-#define MTL_H__
+#ifndef MTL_H_
+#define MTL_H_
 
 /// @file Mtl.h
 /// @brief a class to read Alias Mtl files and store the

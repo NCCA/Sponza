@@ -18,7 +18,6 @@
 
 #include "boost/spirit.hpp"
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
 #include "GroupedObj.h"
 #include <ngl/VAOFactory.h>
 #include <VAO.h>
@@ -476,7 +475,7 @@ void GroupedObj::debugPrint()
   }
 }
 
-void GroupedObj::draw(int _meshID) const
+void GroupedObj::draw(size_t _meshID) const
 {
 //  std::cout<<"Drawing \n";
   m_vaoMesh->bind();

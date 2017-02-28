@@ -57,9 +57,9 @@ typedef struct MeshData
   /// @brief the name of the material to use
   std::string m_material;
   /// @brief the starting index of the group in the VertexArrayObject
-  unsigned int m_startIndex;
+  size_t m_startIndex;
   /// @brief the number of vertices to draw from the start index
-  unsigned int m_numVerts;
+  size_t m_numVerts;
   /// @brief overloaded < operator for mesh sorting
   bool operator <(const MeshData &_r)const {return m_material < _r.m_material;}
 }M;
@@ -111,19 +111,19 @@ public :
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief const iterator to the begining of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  inline std::vector <MeshData>::const_iterator begin() const {return m_meshes.begin(); }
+  std::vector <MeshData>::const_iterator begin() const {return m_meshes.begin(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief const iterator to the end of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  inline std::vector <MeshData>::const_iterator end() const {return m_meshes.end(); }
+  std::vector <MeshData>::const_iterator end() const {return m_meshes.end(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  iterator to the begining of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  inline std::vector <MeshData>::iterator begin() {return m_meshes.begin(); }
+  std::vector <MeshData>::iterator begin() {return m_meshes.begin(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  iterator to the end of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  inline std::vector <MeshData>::iterator end()  {return m_meshes.end(); }
+  std::vector <MeshData>::iterator end()  {return m_meshes.end(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  debug printing of the mesh group information
   //----------------------------------------------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ public :
   /// @brief  draw a group item based on the index into the mesh array
   /// @param[in] _meshID the index into the groups to draw
   //----------------------------------------------------------------------------------------------------------------------
-  void draw(int _meshID) const;
+  void draw(size_t _meshID) const;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  accessor for the number of meshes in the array
   /// @returns m_meshes.size()
