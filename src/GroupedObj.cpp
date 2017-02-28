@@ -424,29 +424,29 @@ void GroupedObj::save( const std::string& _fname )const
   fileOut<<"# This file was created by ngl Obj exporter "<<_fname.c_str()<<std::endl;
   // was c++ 11  for(ngl::Vec3 v : m_norm) for all of these
   // write out the verts
-  BOOST_FOREACH(ngl::Vec3 v , m_verts)
+  for(auto v : m_verts)
   {
     fileOut<<"v "<<v.m_x<<" "<<v.m_y<<" "<<v.m_z<<std::endl;
   }
 
   // write out the tex cords
-  BOOST_FOREACH(ngl::Vec3 v , m_tex)
+  for(auto v : m_tex)
   {
     fileOut<<"vt "<<v.m_x<<" "<<v.m_y<<std::endl;
   }
   // write out the normals
 
-  BOOST_FOREACH(ngl::Vec3 v , m_norm)
+  for(auto v : m_norm)
   {
     fileOut<<"vn "<<v.m_x<<" "<<v.m_y<<" "<<v.m_z<<std::endl;
   }
 
   // finally the faces
-  BOOST_FOREACH(ngl::Face f , m_face)
+  for(auto f : m_face)
   {
   fileOut<<"f ";
   // we now have V/T/N for each to write out
-  for(unsigned int i=0; i<f.m_numVerts; ++i)
+  for(size_t i=0; i<f.m_numVerts; ++i)
   {
     // don't forget that obj indices start from 1 not 0 (i did originally !)
     fileOut<<f.m_vert[i]+1;
@@ -457,7 +457,7 @@ void GroupedObj::save( const std::string& _fname )const
     fileOut<<f.m_norm[i]+1;
     fileOut<<" ";
   }
-  fileOut<<std::endl;
+  fileOut<<'\n';
   }
 }
 
@@ -465,7 +465,7 @@ void GroupedObj::save( const std::string& _fname )const
 
 void GroupedObj::debugPrint()
 {
-  BOOST_FOREACH(MeshData m,m_meshes)
+  for(auto m : m_meshes)
   {
     std::cout<<"------------------------------------\n";
     std::cout<<"Name "<<m.m_name<<"\n";
@@ -499,7 +499,7 @@ bool GroupedObj::saveBinary(const std::string &_fname)
   fileOut.open(_fname.c_str(),std::ios::out | std::ios::binary);
   if (!fileOut.is_open())
   {
-    std::cout <<"File : "<<_fname<<" could not be written for output"<<std::endl;
+    std::cout <<"File : "<<_fname<<" could not be written for output\n";
     return false;
   }
 
@@ -510,7 +510,7 @@ bool GroupedObj::saveBinary(const std::string &_fname)
 
   size_t size=m_meshes.size();
   fileOut.write(reinterpret_cast<char *>(&size),sizeof(size));
-  BOOST_FOREACH(MeshData m, m_meshes)
+  for(auto m : m_meshes)
   {
     size=m.m_name.length();
     fileOut.write(reinterpret_cast<char *>(&size),sizeof(size));
