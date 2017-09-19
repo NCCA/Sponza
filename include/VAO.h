@@ -57,6 +57,7 @@ class  VAO : public ngl::AbstractVAO
     void draw(unsigned int _startIndex, unsigned int _numVerts, GLenum _mode=GL_TRIANGLES) const;
 
     int getSize() const;
+    ngl::Real *mapBuffer(unsigned int , GLenum ){}
 
   protected :
     //----------------------------------------------------------------------------------------------------------------------

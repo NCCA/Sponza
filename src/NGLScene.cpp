@@ -113,7 +113,7 @@ void NGLScene::loadMatricesToShader()
 
   ngl::Mat4 MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam.getVPMatrix();
 
-  shader->setShaderParamFromMat4("MVP",MVP);
+  shader->setUniform("MVP",MVP);
  }
 
 void NGLScene::paintGL()
@@ -161,8 +161,8 @@ void NGLScene::paintGL()
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_REPEAT);
       ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-      shader->setShaderParam3f("ka",currMaterial->Ka.m_x,currMaterial->Ka.m_y,currMaterial->Ka.m_z);
-      shader->setShaderParam1f("transp",currMaterial->d);
+      shader->setUniform("ka",currMaterial->Ka.m_x,currMaterial->Ka.m_y,currMaterial->Ka.m_z);
+      shader->setUniform("transp",currMaterial->d);
     }
     m_model->draw(i);
 

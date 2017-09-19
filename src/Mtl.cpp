@@ -1,6 +1,5 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
-#include <boost/foreach.hpp>
 #include "Mtl.h"
 #include <fstream>
 #include <ngl/NGLStream.h>
@@ -223,7 +222,7 @@ void Mtl::loadTextures()
   // now we load the textures and get the GL id
   // now we associate the ID with the mtlItem
 
-  BOOST_FOREACH(std::string name , names)
+  for(auto name : names)
   {
     std::cout<<"loading texture "<<name<<"\n";
     ngl::Texture t(name);
