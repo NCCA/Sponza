@@ -1,4 +1,4 @@
-#Sponza Demo
+# Sponza Demo
 ![alt tag](http://nccastaff.bournemouth.ac.uk/jmacey/GraphicsLib/Demos/Sponza.png)
 
 A basic framework to load a Wavefront OBJ file with groups and an MTL file with textures and draw the scene as efficiently as possible. The source contains the models and textures from here and is quite large
