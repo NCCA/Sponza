@@ -28,7 +28,7 @@ class  VAO : public ngl::AbstractVAO
     /// @param _mode the mode to draw with.
     /// @returns a new AbstractVAO * object
     //----------------------------------------------------------------------------------------------------------------------
-    static AbstractVAO *create(GLenum _mode=GL_TRIANGLES) { return new VAO(_mode); }
+    static std::unique_ptr<AbstractVAO> create(GLenum _mode=GL_TRIANGLES) { return std::unique_ptr<AbstractVAO>(new VAO(_mode)); }
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief draw the VAO using glDrawArrays
     //----------------------------------------------------------------------------------------------------------------------

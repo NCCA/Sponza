@@ -2,10 +2,7 @@
 #include <QGuiApplication>
 
 #include "NGLScene.h"
-#include <ngl/Camera.h>
-#include <ngl/Light.h>
 #include <ngl/Transformation.h>
-#include <ngl/Material.h>
 #include <ngl/NGLInit.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
@@ -29,7 +26,7 @@ NGLScene::~NGLScene()
 
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_cam.setShape( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
+  m_project=ngl::perspective( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 1550.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
@@ -52,10 +49,10 @@ void NGLScene::initializeGL()
   ngl::Vec3 from(0,40,-140);
   ngl::Vec3 to(0,40,0);
   ngl::Vec3 up(0,1,0);
-  m_cam.set(from,to,up);
+  m_view=ngl::lookAt(from,to,up);
   // set the shape using FOV 45 Aspect Ratio based on Width and Height
   // The final two are near and far clipping planes of 0.5 and 10
-  m_cam.setShape(50,(float)1024/720,10,8000);
+  m_project=ngl::perspective(50,1024.0f/720.0f,10,8000);
   // now to load the shader and set the values
   // grab an instance of shader manager
   // grab an instance of shader manager
@@ -111,7 +108,7 @@ void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
 
-  ngl::Mat4 MVP=m_cam.getVPMatrix()*
+  ngl::Mat4 MVP=m_project*m_view*
                 m_mouseGlobalTX*
                 m_transform.getMatrix();
 
@@ -144,7 +141,7 @@ void NGLScene::paintGL()
   {
     //m_mtl->use(m_model->getMaterial(i));
     mtlItem *currMaterial=m_mtl->find(m_model->getMaterial(i));
-    if(currMaterial == 0) continue;
+    if(currMaterial == nullptr) continue;
     // see if we need to switch the material or not this saves on OpenGL calls and
     // should speed things up
     if(matName !=m_model->getMaterial(i))

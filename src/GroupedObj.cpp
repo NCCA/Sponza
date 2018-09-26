@@ -137,7 +137,7 @@ void GroupedObj::parseTextureCoordinate( const char * _begin  )
   // build tex cord
   // if we have a value use it other wise set to 0
   float vt3 = values.size() == 3 ? values[2] : 0.0f;
-  m_tex.push_back(ngl::Vec3(values[0],values[1],vt3));
+  m_uv.push_back(ngl::Vec3(values[0],values[1],vt3));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -208,12 +208,12 @@ void GroupedObj::splitFace(const std::vector<unsigned int> &_v, const std::vecto
 
     // copy in these references to normal vectors to the mesh's normal vector
 
-    f1.m_tex.push_back(_t[0]-1);
-    f1.m_tex.push_back(_t[1]-1);
-    f1.m_tex.push_back(_t[2]-1);
-    f2.m_tex.push_back(_t[0]-1);
-    f2.m_tex.push_back(_t[2]-1);
-    f2.m_tex.push_back(_t[3]-1);
+    f1.m_uv.push_back(_t[0]-1);
+    f1.m_uv.push_back(_t[1]-1);
+    f1.m_uv.push_back(_t[2]-1);
+    f2.m_uv.push_back(_t[0]-1);
+    f2.m_uv.push_back(_t[2]-1);
+    f2.m_uv.push_back(_t[3]-1);
 
     f1.m_textureCoord=true;
     f2.m_textureCoord=true;
@@ -305,7 +305,7 @@ void GroupedObj::parseFace( const char * _begin  )
     // copy in these references to normal vectors to the mesh's normal vector
     for(auto i : tvec)
     {
-      f.m_tex.push_back(i-1);
+      f.m_uv.push_back(i-1);
     }
 
     f.m_textureCoord=true;
@@ -318,7 +318,7 @@ void GroupedObj::parseFace( const char * _begin  )
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool GroupedObj::load(const std::string &_fname,CalcBB _calcBB  ) noexcept
+bool GroupedObj::load(const std::string_view &_fname,CalcBB _calcBB  ) noexcept
 {
  // here we build up our ebnf rules for parsing
   // so first we have a comment
@@ -344,10 +344,10 @@ bool GroupedObj::load(const std::string &_fname,CalcBB _calcBB  ) noexcept
   // the rule for the face and parser
   srule  face = (spt::ch_p('f') >> *(spt::anychar_p))[bind(&GroupedObj::parseFace, boost::ref(*this), _1)];
   // open the file to parse
-  std::ifstream in(_fname.c_str());
+  std::ifstream in(_fname.data());
 	if (in.is_open() != true)
 	{
-		std::cout<<"FILE NOT FOUND !!!! "<<_fname.c_str()<<"\n";
+    std::cout<<"FILE NOT FOUND !!!! "<<_fname.data()<<"\n";
 		return false;
 
 	}
@@ -361,10 +361,10 @@ bool GroupedObj::load(const std::string &_fname,CalcBB _calcBB  ) noexcept
   in.close();
 
   // grab the sizes used for drawing later
-  m_nVerts=m_verts.size();
-  m_nNorm=m_norm.size();
-  m_nTex=m_tex.size();
-  m_nFaces=m_face.size();
+//  m_=m_verts.size();
+//  m_nNorm=m_norm.size();
+//  m_nTex=m_uv.size();
+//  m_nFaces=m_face.size();
 
   // Calculate the center of the object.
   if(_calcBB == CalcBB::True)
@@ -380,9 +380,9 @@ bool GroupedObj::load(const std::string &_fname,CalcBB _calcBB  ) noexcept
 GroupedObj::GroupedObj( const std::string& _fname ) : ngl::AbstractMesh()
 {
     m_vbo=false;
-    m_ext=0;
+    m_ext=nullptr;
     // set default values
-    m_nVerts=m_nNorm=m_nTex=m_nFaces=0;
+    //m_nVerts=m_nNorm=m_nTex=m_nFaces=0;
     //set the default extents to 0
     m_maxX=0.0f; m_maxY=0.0f; m_maxZ=0.0f;
     m_minX=0.0f; m_minY=0.0f; m_minZ=0.0f;
@@ -390,7 +390,7 @@ GroupedObj::GroupedObj( const std::string& _fname ) : ngl::AbstractMesh()
 
     // load the file in
 
-    m_texture = false;
+//    m_uvture = false;
     m_faceCount=0;
     m_currentMesh.m_startIndex=0;
     m_currentMesh.m_numVerts=0;
@@ -429,7 +429,7 @@ void GroupedObj::save( const std::string& _fname )const
   }
 
   // write out the tex cords
-  for(auto v : m_tex)
+  for(auto v : m_uv)
   {
     fileOut<<"vt "<<v.m_x<<" "<<v.m_y<<std::endl;
   }
@@ -450,7 +450,7 @@ void GroupedObj::save( const std::string& _fname )const
     // don't forget that obj indices start from 1 not 0 (i did originally !)
     fileOut<<f.m_vert[i]+1;
     fileOut<<"/";
-    fileOut<<f.m_tex[i]+1;
+    fileOut<<f.m_uv[i]+1;
     fileOut<<"/";
 
     fileOut<<f.m_norm[i]+1;
@@ -543,20 +543,14 @@ bool GroupedObj::saveBinary(const std::string &_fname)
 // a simple structure to hold our vertex data
 struct vertData
 {
-	GLfloat u; // tex cords from obj
-	GLfloat v; // tex cords
-	GLfloat nx; // normal from obj mesh
+  GLfloat x; // position from obj
+  GLfloat y;
+  GLfloat z;
+  GLfloat nx; // normal from obj mesh
 	GLfloat ny;
 	GLfloat nz;
-	GLfloat x; // position from obj
-	GLfloat y;
-	GLfloat z;
-	GLfloat tx; // tangent calculated by us
-	GLfloat ty;
-	GLfloat tz;
-	GLfloat bx; // binormal (bi-tangent really) calculated by us
-	GLfloat by;
-	GLfloat bz;
+  GLfloat u; // tex cords from obj
+  GLfloat v; // tex cords
 };
 
 bool GroupedObj::loadBinary(const std::string &_fname)
@@ -610,7 +604,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   fileIn.close();
 
   // first we grab an instance of our VOA
-  m_vaoMesh.reset(ngl::VAOFactory::createVAO("sponzaVAO",GL_TRIANGLES));
+  m_vaoMesh=ngl::VAOFactory::createVAO("sponzaVAO",GL_TRIANGLES);
   // next we bind it so it's active for setting data
   m_vaoMesh->bind();
   m_meshSize=size;
@@ -631,16 +625,11 @@ bool GroupedObj::loadBinary(const std::string &_fname)
   // sizeof(vertData) and the offset into the data structure for the first x component is 5 (u,v,nx,ny,nz)..x
   // a simple structure to hold our vertex data
 
-  m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),5);
+  m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),0);
   // uv same as above but starts at 0 and is attrib 1 and only u,v so 2
-  m_vaoMesh->setVertexAttributePointer(1,2,GL_FLOAT,sizeof(vertData),0);
+  m_vaoMesh->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(vertData),3);
   // normal same as vertex only starts at position 2 (u,v)-> nx
-  m_vaoMesh->setVertexAttributePointer(2,3,GL_FLOAT,sizeof(vertData),2);
-  // tangent same as vertex only starts at position 8 (u,v)-> nx
-  m_vaoMesh->setVertexAttributePointer(3,3,GL_FLOAT,sizeof(vertData),8);
-
-	// bi-tangent (or Binormal) same as vertex only starts at position 11 (u,v)-> nx
-  m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
+  m_vaoMesh->setVertexAttributePointer(2,2,GL_FLOAT,sizeof(vertData),6);
 
 
   // now we have set the vertex attributes we tell the VAO class how many indices to draw when
@@ -682,7 +671,7 @@ void GroupedObj::createVAO() noexcept
 
 
 	// loop for each of the faces
-  for(size_t i=0;i<m_nFaces;++i)
+  for(size_t i=0;i<m_face.size();++i)
 	{
 		// now for each triangle in the face (remember we ensured tri above)
     for(size_t j=0;j<loopFaceCount;++j)
@@ -693,19 +682,19 @@ void GroupedObj::createVAO() noexcept
 			d.y=m_verts[m_face[i].m_vert[j]].m_y;
 			d.z=m_verts[m_face[i].m_vert[j]].m_z;
 			// now if we have norms of tex (possibly could not) pack them as well
-			if(m_nNorm >0 && m_nTex > 0)
+      if(m_norm.size() >0 && m_uv.size() > 0)
 			{
 
         d.nx=m_norm[m_face[i].m_norm[j]].m_x;
         d.ny=m_norm[m_face[i].m_norm[j]].m_y;
         d.nz=m_norm[m_face[i].m_norm[j]].m_z;
 
-				d.u=m_tex[m_face[i].m_tex[j]].m_x;
-				d.v=m_tex[m_face[i].m_tex[j]].m_y;
+        d.u=m_uv[m_face[i].m_uv[j]].m_x;
+        d.v=m_uv[m_face[i].m_uv[j]].m_y;
 
       }
       // now if neither are present (only verts like Zbrush models)
-      else if(m_nNorm ==0 && m_nTex==0)
+      else if(m_norm.size() ==0 && m_uv.size()==0)
       {
         d.nx=0;
         d.ny=0;
@@ -714,7 +703,7 @@ void GroupedObj::createVAO() noexcept
         d.v=0;
       }
       // here we've got norms but not tex
-      else if(m_nNorm >0 && m_nTex==0)
+      else if(m_norm.size() >0 && m_uv.size()==0)
       {
         d.nx=m_norm[m_face[i].m_norm[j]].m_x;
         d.ny=m_norm[m_face[i].m_norm[j]].m_y;
@@ -723,48 +712,20 @@ void GroupedObj::createVAO() noexcept
         d.v=0;
       }
       // here we've got tex but not norm least common
-      else if(m_nNorm ==0 && m_nTex>0)
+      else if(m_norm.size() ==0 && m_uv.size()>0)
       {
         d.nx=0;
         d.ny=0;
         d.nz=0;
-        d.u=m_tex[m_face[i].m_tex[j]].m_x;
-        d.v=m_tex[m_face[i].m_tex[j]].m_y;
+        d.u=m_uv[m_face[i].m_uv[j]].m_x;
+        d.v=m_uv[m_face[i].m_uv[j]].m_y;
       }
-      // now we calculate the tangent / bi-normal (tangent) based on the article here
-      // http://www.terathon.com/code/tangent.html
-
-      ngl::Vec3 c1 = m_norm[m_face[i].m_norm[j]].cross(ngl::Vec3(0.0, 0.0, 1.0));
-      ngl::Vec3 c2 = m_norm[m_face[i].m_norm[j]].cross(ngl::Vec3(0.0, 1.0, 0.0));
-      ngl::Vec3 tangent;
-      ngl::Vec3 binormal;
-      if(c1.length()>c2.length())
-      {
-        tangent = c1;
-      }
-      else
-      {
-        tangent = c2;
-      }
-      // now we normalize the tangent so we don't need to do it in the shader
-      tangent.normalize();
-      // now we calculate the binormal using the model normal and tangent (cross)
-      binormal = m_norm[m_face[i].m_norm[j]].cross(tangent);
-      // normalize again so we don't need to in the shader
-      binormal.normalize();
-      d.tx=tangent.m_x;
-      d.ty=tangent.m_y;
-      d.tz=tangent.m_z;
-      d.bx=binormal.m_x;
-      d.by=binormal.m_y;
-      d.bz=binormal.m_z;
-
     vboMesh.push_back(d);
     }
   }
 
   // first we grab an instance of our VOA
-  m_vaoMesh.reset( ngl::VAOFactory::createVAO ("sponzaVAO",m_dataPackType) );
+  m_vaoMesh= ngl::VAOFactory::createVAO ("sponzaVAO",m_dataPackType);
   // next we bind it so it's active for setting data
   m_vaoMesh->bind();
   m_meshSize=vboMesh.size();
@@ -773,7 +734,7 @@ void GroupedObj::createVAO() noexcept
 	// how much (in bytes) data we are copying
 	// a pointer to the first element of data (in this case the address of the first element of the
 	// std::vector
-  m_vaoMesh->setData(VAO::VertexData(m_meshSize*sizeof(vertData),vboMesh[0].u));
+  m_vaoMesh->setData(VAO::VertexData(m_meshSize*sizeof(vertData),vboMesh[0].x));
   // in this case we have packed our data in interleaved format as follows
 	// u,v,nx,ny,nz,x,y,z
 	// If you look at the shader we have the following attributes being used
@@ -783,16 +744,11 @@ void GroupedObj::createVAO() noexcept
 	// so we need to set the vertexAttributePointer so the correct size and type as follows
 	// vertex is attribute 0 with x,y,z(3) parts of type GL_FLOAT, our complete packed data is
 	// sizeof(vertData) and the offset into the data structure for the first x component is 5 (u,v,nx,ny,nz)..x
-  m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),5);
+  m_vaoMesh->setVertexAttributePointer(0,3,GL_FLOAT,sizeof(vertData),0);
 	// uv same as above but starts at 0 and is attrib 1 and only u,v so 2
-  m_vaoMesh->setVertexAttributePointer(1,2,GL_FLOAT,sizeof(vertData),0);
+  m_vaoMesh->setVertexAttributePointer(1,3,GL_FLOAT,sizeof(vertData),3);
 	// normal same as vertex only starts at position 2 (u,v)-> nx
-  m_vaoMesh->setVertexAttributePointer(2,3,GL_FLOAT,sizeof(vertData),2);
-	// tangent same as vertex only starts at position 8 (u,v)-> nx
-  m_vaoMesh->setVertexAttributePointer(3,3,GL_FLOAT,sizeof(vertData),8);
-
-	// bi-tangent (or Binormal) same as vertex only starts at position 11 (u,v)-> nx
-  m_vaoMesh->setVertexAttributePointer(4,3,GL_FLOAT,sizeof(vertData),11);
+  m_vaoMesh->setVertexAttributePointer(2,2,GL_FLOAT,sizeof(vertData),6);
 
 
 	// now we have set the vertex attributes we tell the VAO class how many indices to draw when

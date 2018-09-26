@@ -1,7 +1,6 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
 #include "WindowParams.h"
-#include <ngl/Camera.h>
 #include <ngl/Transformation.h>
 #include "Mtl.h"
 #include "GroupedObj.h"
@@ -32,7 +31,7 @@ class NGLScene : public QOpenGLWindow
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief dtor must close down ngl and release OpenGL resources
     //----------------------------------------------------------------------------------------------------------------------
-    ~NGLScene();
+    ~NGLScene() override;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief the initialize class is called once when the window is created and we have a valid GL context
     /// use this to setup any default GL stuff
@@ -59,7 +58,8 @@ private:
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief Our Camera
     //----------------------------------------------------------------------------------------------------------------------
-    ngl::Camera m_cam;
+    ngl::Mat4 m_view;
+    ngl::Mat4 m_project;
     //----------------------------------------------------------------------------------------------------------------------
     /// @brief transformation stack for the gl transformations etc
     //----------------------------------------------------------------------------------------------------------------------

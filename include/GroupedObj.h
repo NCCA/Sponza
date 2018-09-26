@@ -85,7 +85,7 @@ public :
   /// @param[in]  _fname the name of the obj file to load
   /// @param[in] _calcBB if we only want to load data and not use GL then set this to false
   //----------------------------------------------------------------------------------------------------------------------
-  bool load(const std::string& _fname, CalcBB _calcBB=CalcBB::True) noexcept;
+  bool load(const std::string_view& _fname, CalcBB _calcBB=CalcBB::True) noexcept override ;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  method to save the obj
   /// @param[in] _fname the name of the file to save
@@ -216,7 +216,7 @@ protected :
     /// time we find a new group. it will also re-set faceCount to zero once this is done
     //----------------------------------------------------------------------------------------------------------------------
     unsigned int m_offset;
-    void createVAO() noexcept;
+    void createVAO() noexcept override;
 
 
 };
