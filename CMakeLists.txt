@@ -1,64 +1,73 @@
-cmake_minimum_required(VERSION 2.8.11)
-# Name of the project
-set(PROJECT_NAME Sponza)
-project(${PROJECT_NAME})
-#Bring the headers into the project (local ones)
-include_directories(include $ENV{HOME}/NGL/include)
+cmake_minimum_required(VERSION 3.12)
+#-------------------------------------------------------------------------------------------
+# I'm going to use vcpk in most cases for our install of 3rd party libs
+# this is going to check the environment variable for CMAKE_TOOLCHAIN_FILE and this must point to where
+# vcpkg.cmake is in the University this is set in your .bash_profile to
+# export CMAKE_TOOLCHAIN_FILE=/public/devel/2020/vcpkg/scripts/buildsystems/vcpkg.cmake
+#-------------------------------------------------------------------------------------------
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE AND DEFINED ENV{CMAKE_TOOLCHAIN_FILE})
+   set(CMAKE_TOOLCHAIN_FILE $ENV{CMAKE_TOOLCHAIN_FILE})
+endif()
 
-#the file(GLOB...) allows for wildcard additions of our src dir
-set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp  
+# Name of the project
+project(SponzaBuild)
+# This is the name of the Exe change this and it will change everywhere
+set(TargetName Sponza)
+# This will include the file NGLConfig.cmake, you need to add the location to this either using
+# -DCMAKE_PREFIX_PATH=~/NGL or as a system environment variable. 
+find_package(NGL CONFIG REQUIRED)
+# Instruct CMake to run moc automatically when needed (Qt projects only)
+set(CMAKE_AUTOMOC ON)
+# find Qt libs first we check for Version 6
+find_package(Qt6 COMPONENTS OpenGL Widgets QUIET )
+if ( Qt6_FOUND )
+    message("Found Qt6 Using that")
+else()
+    message("Found Qt5 Using that")
+    find_package(Qt5 COMPONENTS OpenGL Widgets REQUIRED)
+endif()
+
+# find Bullet Libs
+find_package(Bullet CONFIG REQUIRED)
+# use C++ 17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+# Set the name of the executable we want to build
+add_executable(${TargetName})
+
+target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp  
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp  
-			${PROJECT_SOURCE_DIR}/src/GroupedObj.cpp
+            ${PROJECT_SOURCE_DIR}/src/NGLSceneMouseControls.cpp
+            ${PROJECT_SOURCE_DIR}/src/GroupedObj.cpp
+	        ${PROJECT_SOURCE_DIR}/src/VAO.cpp
 			${PROJECT_SOURCE_DIR}/src/Mtl.cpp
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
 			${PROJECT_SOURCE_DIR}/include/GroupedObj.h
 			${PROJECT_SOURCE_DIR}/include/Mtl.h
+    		${PROJECT_SOURCE_DIR}/include/VAO.h
+    
 )
-# use C++ 11
-set(CMAKE_CXX_STANDARD 11)
+# add exe and link libs that must be after the other defines
+target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL)
+# add the bullet libs
+target_link_libraries(${TargetName} PRIVATE LinearMath Bullet3Common BulletCollision BulletDynamics BulletSoftBody)
 
-# see what platform we are on and set platform defines
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	add_definitions(-DDARWIN)
-	find_library(MACGL OpenGL)
-	set ( PROJECT_LINK_LIBS -lNGL ${MACGL})
+add_custom_target(CopyResources ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/shaders
+    $<TARGET_FILE_DIR:${TargetName}>/shaders
 
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	add_definitions(-DLINUX)
-	set ( PROJECT_LINK_LIBS -lNGL  -lGL)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/models
+    $<TARGET_FILE_DIR:${TargetName}>/models
 
-endif()
-
-
-#As were using Qt we need to run moc
-#disable -rdynamic
-SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
-SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
-# define this if you want to include the stanford data sets
-# these are very big and make compilation time huge
-add_definitions(-DADDLARGEMODELS)
-
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
-
-add_definitions(-O2 -D_FILE_OFFSET_BITS=64 -fPIC) 
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_SOURCE_DIR}/textures
+    $<TARGET_FILE_DIR:${TargetName}>/textures
 
 
-# now add NGL specific values
-#set ( PROJECT_LINK_LIBS -lNGL )
-link_directories( $ENV{HOME}/NGL/lib )
-# as NGL uses Qt we need to define this flag
-add_definitions(-DQT5BUILD)
-# NGL also needs the OpenGL framework from Qt so add it
-find_package(Qt5OpenGL)
-find_package(Qt5Widgets)
-find_package(Qt5Gui)
-find_package(Qt5Core)
+)
 
 
-# add exe and link libs this must be after the other defines
-add_executable(${PROJECT_NAME} ${SOURCES})
-target_link_libraries(${PROJECT_NAME} ${PROJECT_LINK_LIBS} Qt5::OpenGL Qt5::Core Qt5::Gui Qt5::Widgets )
 

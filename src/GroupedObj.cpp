@@ -318,7 +318,7 @@ void GroupedObj::parseFace( const char * _begin  )
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-bool GroupedObj::load(const std::string_view &_fname,CalcBB _calcBB  ) noexcept
+bool GroupedObj::load(const std::string &_fname,CalcBB _calcBB  ) noexcept
 {
  // here we build up our ebnf rules for parsing
   // so first we have a comment
@@ -647,7 +647,7 @@ bool GroupedObj::loadBinary(const std::string &_fname)
 
 
 
-void GroupedObj::createVAO() noexcept
+void GroupedObj::createVAO(ResetVAO _reset) noexcept
 {
 
 // else allocate space as build our VAO
