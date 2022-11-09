@@ -19,63 +19,56 @@
 
 #include <ngl/AbstractVAO.h>
 
-
-class  VAO : public ngl::AbstractVAO
+class VAO : public ngl::AbstractVAO
 {
-  public :
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief creator method for the factory
-    /// @param _mode the mode to draw with.
-    /// @returns a new AbstractVAO * object
-    //----------------------------------------------------------------------------------------------------------------------
-    static std::unique_ptr<AbstractVAO> create(GLenum _mode=GL_TRIANGLES) { return std::unique_ptr<AbstractVAO>(new VAO(_mode)); }
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief draw the VAO using glDrawArrays
-    //----------------------------------------------------------------------------------------------------------------------
-    virtual void draw() const;
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief dtor don't do anything as the remove clears things
-    //----------------------------------------------------------------------------------------------------------------------
-    virtual ~VAO()=default;
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief remove the VAO and buffers created
-    //----------------------------------------------------------------------------------------------------------------------
-    virtual void removeVAO();
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief, this method sets the data for the VAO if data has already been set it will remove the existing data
-    /// and then re-set with the new data.
-    //----------------------------------------------------------------------------------------------------------------------
-    //void setData(size_t _size,const GLfloat &_data,GLenum _mode=GL_STATIC_DRAW) ;
-    virtual void setData(const VertexData &_data);
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief return the id of the buffer, if there is only 1 buffer just return this
-    /// if we have the more than one buffer the sub class manages the id's
-    /// @param _buffer index (default to 0 for single buffer VAO's)
-    //----------------------------------------------------------------------------------------------------------------------
-     GLuint getBufferID(unsigned int ){return m_buffer;}
-    /// overide the draw method
-    void draw(unsigned int _startIndex, unsigned int _numVerts, GLenum _mode=GL_TRIANGLES) const;
+public:
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief creator method for the factory
+  /// @param _mode the mode to draw with.
+  /// @returns a new AbstractVAO * object
+  //----------------------------------------------------------------------------------------------------------------------
+  static std::unique_ptr<AbstractVAO> create(GLenum _mode = GL_TRIANGLES) { return std::unique_ptr<AbstractVAO>(new VAO(_mode)); }
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief draw the VAO using glDrawArrays
+  //----------------------------------------------------------------------------------------------------------------------
+  virtual void draw() const;
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief dtor don't do anything as the remove clears things
+  //----------------------------------------------------------------------------------------------------------------------
+  virtual ~VAO() = default;
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief remove the VAO and buffers created
+  //----------------------------------------------------------------------------------------------------------------------
+  virtual void removeVAO();
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief, this method sets the data for the VAO if data has already been set it will remove the existing data
+  /// and then re-set with the new data.
+  //----------------------------------------------------------------------------------------------------------------------
+  // void setData(size_t _size,const GLfloat &_data,GLenum _mode=GL_STATIC_DRAW) ;
+  virtual void setData(const VertexData &_data);
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief return the id of the buffer, if there is only 1 buffer just return this
+  /// if we have the more than one buffer the sub class manages the id's
+  /// @param _buffer index (default to 0 for single buffer VAO's)
+  //----------------------------------------------------------------------------------------------------------------------
+  GLuint getBufferID(unsigned int) { return m_buffer; }
+  /// overide the draw method
+  void draw(unsigned int _startIndex, unsigned int _numVerts, GLenum _mode = GL_TRIANGLES) const;
 
-    int getSize() const;
-    ngl::Real *mapBuffer(unsigned int , GLenum ){}
+  int getSize() const;
+  ngl::Real *mapBuffer(unsigned int, GLenum);
 
-  protected :
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief ctor calles parent ctor to allocate vao;
-    //----------------------------------------------------------------------------------------------------------------------
-    VAO(GLenum _mode)  : AbstractVAO(_mode)
-    {
+protected:
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief ctor calles parent ctor to allocate vao;
+  //----------------------------------------------------------------------------------------------------------------------
+  VAO(GLenum _mode) : AbstractVAO(_mode) {}
 
-    }
-
-  private :
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief the id of the buffer for the VAO
-    //----------------------------------------------------------------------------------------------------------------------
-    GLuint m_buffer=0;
-
+private:
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief the id of the buffer for the VAO
+  //----------------------------------------------------------------------------------------------------------------------
+  GLuint m_buffer = 0;
 };
-
-
 
 #endif
