@@ -42,15 +42,13 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <ngl/Vec4.h>
-#include <ngl/AbstractMesh.h>
-#include <ngl/BBox.h>
-#include <ngl/RibExport.h>
+#include <ngl/Obj.h>
+#include "VAO.h"
 #include <cmath>
 
 /// @brief simple data structure to store the Mesh information, it has an overloaded < operator
 /// to allow for sorting by the Material name type
-typedef struct MeshData
+struct MeshData
 {
   /// @brief the name of the mesh group from the obj file
   std::string m_name;
@@ -61,36 +59,68 @@ typedef struct MeshData
   /// @brief the number of vertices to draw from the start index
   size_t m_numVerts;
   /// @brief overloaded < operator for mesh sorting
-  bool operator <(const MeshData &_r)const {return m_material < _r.m_material;}
-}M;
+  bool operator<(const MeshData &_r) const { return m_material < _r.m_material; }
+};
 
+class GroupedObj : public ngl::Obj
+{
+public:
+  GroupedObj(const std::string &_fname);
+  bool load(const std::string &_fname, CalcBB _calcBB = CalcBB::True) noexcept override;
+  void save(const std::string &_fname) const;
+  bool saveBinary(const std::string &_fname);
+  bool loadBinary(const std::string &_fname);
+  std::vector<MeshData>::const_iterator begin() const;
+  std::vector<MeshData>::const_iterator end() const;
+  std::vector<MeshData>::iterator begin();
+  std::vector<MeshData>::iterator end();
+  void debugPrint();
+  void draw(size_t _meshID) const;
+  size_t numMeshes() const;
+  std::string getMaterial(unsigned int _m) const;
+  std::string getName(unsigned int _m) const;
+  bool parseGroup(std::vector<std::string> &_tokens) noexcept;
+  bool parseMaterial(std::vector<std::string> &_tokens) noexcept;
+  bool parseFace(std::vector<std::string> &_tokens) noexcept override;
 
-class  GroupedObj : public ngl::AbstractMesh
+private:
+  std::vector<MeshData> m_meshes;
+  MeshData m_currentMesh;
+  std::string m_currentMeshName;
+  std::string m_currentMaterial;
+  unsigned int m_faceCount;
+  unsigned int m_offset;
+  void createVAO(ResetVAO _reset = ResetVAO::False) noexcept override;
+};
+
+#endif
+
+/*
+class GroupedObj : public ngl::AbstractMesh
 {
 
-public :
-
+public:
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief default constructor
   //----------------------------------------------------------------------------------------------------------------------
-    GroupedObj(){;}
+  GroupedObj() { ; }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  constructor to load an objfile as a parameter
   /// @param[in]  &_fname the name of the obj file to load
   //----------------------------------------------------------------------------------------------------------------------
-  GroupedObj(const std::string& _fname );
+  GroupedObj(const std::string &_fname);
 
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  Method to load the file in
   /// @param[in]  _fname the name of the obj file to load
   /// @param[in] _calcBB if we only want to load data and not use GL then set this to false
   //----------------------------------------------------------------------------------------------------------------------
-  bool load(const std::string& _fname, CalcBB _calcBB=CalcBB::True) noexcept override ;
+  bool load(const std::string &_fname, CalcBB _calcBB = CalcBB::True) noexcept override;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  method to save the obj
   /// @param[in] _fname the name of the file to save
   //----------------------------------------------------------------------------------------------------------------------
-  void save(const std::string& _fname ) const;
+  void save(const std::string &_fname) const;
 
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  method to save data structures and VAO as binary
@@ -98,32 +128,31 @@ public :
   /// @note as this maps the VAO it can't be const as OpenGL make this possible to
   /// mutate the data stored.
   //----------------------------------------------------------------------------------------------------------------------
-  bool saveBinary(const std::string& _fname );
+  bool saveBinary(const std::string &_fname);
 
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  method to load the data structures and VAO as binary and re-build the
   /// mesh and all associations
   /// @param[in] _fname the name of the file to save
   //----------------------------------------------------------------------------------------------------------------------
-  bool loadBinary( const std::string& _fname);
-
+  bool loadBinary(const std::string &_fname);
 
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief const iterator to the begining of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  std::vector <MeshData>::const_iterator begin() const {return m_meshes.begin(); }
+  std::vector<MeshData>::const_iterator begin() const { return m_meshes.begin(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief const iterator to the end of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  std::vector <MeshData>::const_iterator end() const {return m_meshes.end(); }
+  std::vector<MeshData>::const_iterator end() const { return m_meshes.end(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  iterator to the begining of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  std::vector <MeshData>::iterator begin() {return m_meshes.begin(); }
+  std::vector<MeshData>::iterator begin() { return m_meshes.begin(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  iterator to the end of the mesh list
   //----------------------------------------------------------------------------------------------------------------------
-  std::vector <MeshData>::iterator end()  {return m_meshes.end(); }
+  std::vector<MeshData>::iterator end() { return m_meshes.end(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  debug printing of the mesh group information
   //----------------------------------------------------------------------------------------------------------------------
@@ -137,21 +166,21 @@ public :
   /// @brief  accessor for the number of meshes in the array
   /// @returns m_meshes.size()
   //----------------------------------------------------------------------------------------------------------------------
-  size_t numMeshes()const {return m_meshes.size(); }
+  size_t numMeshes() const { return m_meshes.size(); }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  accessor for the material name at index i
   /// @param[in] _m the index to access no error checking.
   /// @returns material at index.
   //----------------------------------------------------------------------------------------------------------------------
-  std::string getMaterial(unsigned int _m)const {return m_meshes[_m].m_material;}
+  std::string getMaterial(unsigned int _m) const { return m_meshes[_m].m_material; }
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief  accessor for the group name name at index i
   /// @param[in] _m the index to access no error checking.
   /// @returns group name at index.
   //----------------------------------------------------------------------------------------------------------------------
-  std::string getName(unsigned int _m)const {return m_meshes[_m].m_name;}
+  std::string getName(unsigned int _m) const { return m_meshes[_m].m_name; }
 
-protected :
+protected:
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief parser function to parse the vertex used by boost::spirit parser
   /// @param[in] _begin the start of the string to parse
@@ -161,27 +190,27 @@ protected :
   /// @brief parser function to parse the Norma used by boost::spirit parser
   /// @param[in] _begin the start of the string to parse
   //----------------------------------------------------------------------------------------------------------------------
-  void parseNormal(const char *_begin  );
+  void parseNormal(const char *_begin);
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief parser function to parse the text cord used by boost::spirit parser
   /// @param[in] _begin the start of the string to parse
   //----------------------------------------------------------------------------------------------------------------------
-  void parseTextureCoordinate( const char * _begin  );
+  void parseTextureCoordinate(const char *_begin);
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief parser function to parse the Face data used by boost::spirit parser
   /// @param[in] _begin the start of the string to parse
   //----------------------------------------------------------------------------------------------------------------------
-  void parseFace(const char * _begin );
+  void parseFace(const char *_begin);
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief parser function to parse the material name used by boost::spirit parser
   /// @param[in] _begin the start of the string to parse
   //----------------------------------------------------------------------------------------------------------------------
-  void parseMaterial(const char * _begin );
+  void parseMaterial(const char *_begin);
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief parser function to parse the group name used by boost::spirit parser
   /// @param[in] _begin the start of the string to parse
   //----------------------------------------------------------------------------------------------------------------------
-  void parseGroup(const char * _begin );
+  void parseGroup(const char *_begin);
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief split a quad face into two triangles and add them to the face list
   /// @param[in] _v the list of vertices found by the parser
@@ -189,39 +218,37 @@ protected :
   /// @param[in] _n the list of normals found by the parser
   //----------------------------------------------------------------------------------------------------------------------
 
-  void splitFace(const std::vector<unsigned int> &_v,const std::vector<unsigned int> &_t,const std::vector<unsigned int> &_n);
- private :
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief the list of mesh data that stores the group information
-    //----------------------------------------------------------------------------------------------------------------------
-    std::vector <MeshData> m_meshes;
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief the current mesh being populated by the parser. This is added to the list once a new group is found
-    //----------------------------------------------------------------------------------------------------------------------
-    MeshData m_currentMesh;
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief the name of the current mesh
-    //----------------------------------------------------------------------------------------------------------------------
-    std::string m_currentMeshName;
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief the name of the current material
-    //----------------------------------------------------------------------------------------------------------------------
-    std::string m_currentMaterial;
-    /// @brief this is used to count the number of faces in the current group, updated by 3 each time we encounter a face
-    /// if we split a face it updates by 6.
-    //----------------------------------------------------------------------------------------------------------------------
-    unsigned int m_faceCount;
-    //----------------------------------------------------------------------------------------------------------------------
-    /// @brief the current face index offset into the VAO , this is used to count the offsets into the VAO and is incremented by m_faceCount each
-    /// time we find a new group. it will also re-set faceCount to zero once this is done
-    //----------------------------------------------------------------------------------------------------------------------
-    unsigned int m_offset;
-    void createVAO(ResetVAO _reset=ResetVAO::False) noexcept override;
+  void splitFace(const std::vector<unsigned int> &_v, const std::vector<unsigned int> &_t, const std::vector<unsigned int> &_n);
 
-
+private:
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief the list of mesh data that stores the group information
+  //----------------------------------------------------------------------------------------------------------------------
+  std::vector<MeshData> m_meshes;
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief the current mesh being populated by the parser. This is added to the list once a new group is found
+  //----------------------------------------------------------------------------------------------------------------------
+  MeshData m_currentMesh;
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief the name of the current mesh
+  //----------------------------------------------------------------------------------------------------------------------
+  std::string m_currentMeshName;
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief the name of the current material
+  //----------------------------------------------------------------------------------------------------------------------
+  std::string m_currentMaterial;
+  /// @brief this is used to count the number of faces in the current group, updated by 3 each time we encounter a face
+  /// if we split a face it updates by 6.
+  //----------------------------------------------------------------------------------------------------------------------
+  unsigned int m_faceCount;
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief the current face index offset into the VAO , this is used to count the offsets into the VAO and is incremented by m_faceCount each
+  /// time we find a new group. it will also re-set faceCount to zero once this is done
+  //----------------------------------------------------------------------------------------------------------------------
+  unsigned int m_offset;
+  void createVAO(ResetVAO _reset = ResetVAO::False) noexcept override;
 };
-
 
 #endif
 //----------------------------------------------------------------------------------------------------------------------
-
+*/
