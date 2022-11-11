@@ -65,8 +65,8 @@ struct MeshData
 class GroupedObj : public ngl::Obj
 {
 public:
-  GroupedObj(const std::string &_fname);
-  bool load(const std::string &_fname, CalcBB _calcBB = CalcBB::True) noexcept override;
+  GroupedObj(std::string_view _fname);
+  bool load(std::string_view _fname, CalcBB _calcBB = CalcBB::True) noexcept override;
   void debugPrint();
   void draw(size_t _meshID) const;
   size_t numMeshes() const;

@@ -53,7 +53,7 @@ target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL)
 # add the bullet libs
 target_link_libraries(${TargetName} PRIVATE LinearMath Bullet3Common BulletCollision BulletDynamics BulletSoftBody)
 
-add_custom_target(CopyResources ALL
+add_custom_target(${TargetName}CopyResources ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_CURRENT_SOURCE_DIR}/shaders
     $<TARGET_FILE_DIR:${TargetName}>/shaders

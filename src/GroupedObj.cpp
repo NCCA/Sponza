@@ -33,7 +33,7 @@ struct VertData
   GLfloat v; // tex cords
 };
 
-GroupedObj::GroupedObj(const std::string &_fname)
+GroupedObj::GroupedObj(std::string_view _fname)
 {
   m_loaded = load(_fname, CalcBB::True);
   // as the face triggers the push back of the meshes once we have finished the load we need to add the rest
@@ -46,7 +46,7 @@ GroupedObj::GroupedObj(const std::string &_fname)
   std::sort(m_meshes.begin(), m_meshes.end());
   createVAO();
 }
-bool GroupedObj::load(const std::string &_fname, CalcBB _calcBB) noexcept
+bool GroupedObj::load(std::string_view _fname, CalcBB _calcBB) noexcept
 {
   m_faceCount = 0;
   m_currentMesh.m_startIndex = 0;
