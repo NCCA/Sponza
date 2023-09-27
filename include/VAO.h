@@ -51,7 +51,7 @@ public:
   /// if we have the more than one buffer the sub class manages the id's
   /// @param _buffer index (default to 0 for single buffer VAO's)
   //----------------------------------------------------------------------------------------------------------------------
-  GLuint getBufferID(unsigned int) { return m_buffer; }
+  GLuint getBufferID(unsigned int) const override{ return m_buffer; }
   /// overide the draw method
   void draw(unsigned int _startIndex, unsigned int _numVerts, GLenum _mode = GL_TRIANGLES) const;
 
